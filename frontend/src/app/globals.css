@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 17, 24, 39;
+  --background-rgb: 255, 255, 255;
+  --sfdp-green: #16a34a;
+  --sfdp-green-light: #dcfce7;
+  --sfdp-green-dark: #14532d;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-rgb));
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Platform Colors */
+.platform-twitter { color: #1DA1F2; }
+.platform-youtube { color: #FF0000; }
+.platform-instagram { color: #E4405F; }
+.platform-facebook { color: #1877F2; }
+
+.bg-platform-twitter { background-color: #1DA1F2; }
+.bg-platform-youtube { background-color: #FF0000; }
+.bg-platform-instagram { background-color: #E4405F; }
+.bg-platform-facebook { background-color: #1877F2; }
+
+/* Smooth transitions */
+* {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
