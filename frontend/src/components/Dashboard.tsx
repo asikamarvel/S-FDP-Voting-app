@@ -12,6 +12,7 @@ import {
   MessageSquare,
   TrendingUp,
   Loader2,
+  LogOut,
 } from 'lucide-react';
 import {
   campaignApi,
@@ -23,6 +24,7 @@ import {
 } from '@/lib/api';
 import { CampaignForm } from './CampaignForm';
 import { PostForm } from './PostForm';
+import { useAuth } from '@/lib/auth';
 
 // Platform configuration
 type PlatformKey = 'twitter' | 'youtube' | 'instagram' | 'facebook';
@@ -35,6 +37,7 @@ const platforms: { key: PlatformKey; name: string; icon: string; color: string; 
 ];
 
 export function Dashboard() {
+  const { logout } = useAuth();
   const [activePlatform, setActivePlatform] = useState<PlatformKey>('twitter');
   const [showCampaignForm, setShowCampaignForm] = useState(false);
   const [showPostForm, setShowPostForm] = useState(false);
@@ -239,12 +242,19 @@ export function Dashboard() {
             )}
 
             {/* Quick Actions */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               {activeCampaign && (
                 <span className="text-sm text-gray-500">
                   {activeCampaign.follower_count.toLocaleString()} followers
                 </span>
               )}
+              <button
+                onClick={logout}
+                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
             </div>
           </div>
         </div>
