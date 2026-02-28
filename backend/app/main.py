@@ -55,5 +55,4 @@ async def debug_dbinfo():
     async with engine.connect() as conn:
         result = await conn.execute(text("select count(*) from campaigns"))
         count = result.scalar() or 0
-    redacted_url = engine.url.render_as_string(hide_password=True)
-    return {"campaign_count": count, "db_url": redacted_url}
+    return {"campaign_count": count, "db_url": str(engine.url)}
