@@ -214,6 +214,12 @@ async def sync_engagements(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Error syncing engagements: {result.get('message', 'Unknown error')}"
             )
+        
+        # For Twitter: update shares_count with actual retweeter count (API metrics can be inconsistent)
+        if platform == PlatformType.TWITTER:
+            post.shares_count = result.get("total", 0)  # Use actual tracked count, not unreliable API metrics
+            await db.commit()
+        
         removed = result.get("removed", 0)
         removed_msg = f", {removed} removed" if removed > 0 else ""
         
