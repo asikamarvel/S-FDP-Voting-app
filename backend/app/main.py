@@ -9,8 +9,20 @@ from app.routers import campaigns, posts, platforms, validation, export, submiss
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Log the database URL being used (for debugging)
+    from app.database import DATABASE_URL
+    print(f"[STARTUP] Connecting to database: {DATABASE_URL[:50]}...")
+    
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+    
+    # Log campaign count at startup
+    from sqlalchemy import text
+    async with engine.connect() as conn:
+        result = await conn.execute(text("SELECT COUNT(*) FROM campaigns"))
+        count = result.scalar()
+        print(f"[STARTUP] Found {count} campaigns in database")
+    
     yield
     await engine.dispose()
 

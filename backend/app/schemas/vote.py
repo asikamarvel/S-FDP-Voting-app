@@ -4,7 +4,7 @@ Vote Schemas
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
-from app.models.engagement import EngagementType
+from app.enums import EngagementType
 
 
 class VoteBase(BaseModel):

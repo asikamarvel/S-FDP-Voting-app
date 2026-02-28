@@ -7,7 +7,8 @@ from sqlalchemy import select
 from typing import Optional
 
 from app.database import get_db
-from app.models.campaign import Campaign, PlatformType
+from app.models.campaign import Campaign
+from app.enums import PlatformType
 from app.models.post import Post
 from app.adapters import get_adapter
 from app.services.sync_service import SyncService

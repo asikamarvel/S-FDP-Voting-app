@@ -9,7 +9,8 @@ from sqlalchemy.dialects.sqlite import insert
 from app.models.campaign import Campaign
 from app.models.post import Post
 from app.models.follower import Follower
-from app.models.engagement import Engagement, EngagementType
+from app.models.engagement import Engagement
+from app.enums import EngagementType
 from app.models.vote import Vote
 from app.adapters.base import BasePlatformAdapter
 

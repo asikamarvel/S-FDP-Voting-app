@@ -1,19 +1,10 @@
 """
 Campaign Model
 """
-from sqlalchemy import Column, Integer, String, DateTime, Enum as SQLEnum
+from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
-import enum
-
-
-class PlatformType(str, enum.Enum):
-    INSTAGRAM = "instagram"
-    TWITTER = "twitter"
-    YOUTUBE = "youtube"
-    TIKTOK = "tiktok"
-    FACEBOOK = "facebook"
 
 
 class Campaign(Base):
@@ -21,7 +12,7 @@ class Campaign(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), nullable=False)
-    platform = Column(SQLEnum(PlatformType), nullable=False)
+    platform = Column(String(50), nullable=False)  # Changed from Enum to String for compatibility
     official_account_id = Column(String(255), nullable=False)
     official_account_username = Column(String(255), nullable=True)
     description = Column(String(1000), nullable=True)

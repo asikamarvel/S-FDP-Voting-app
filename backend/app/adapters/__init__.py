@@ -5,7 +5,7 @@ from app.adapters.twitter import TwitterAdapter
 from app.adapters.youtube import YouTubeAdapter
 from app.adapters.tiktok import TikTokAdapter
 from app.adapters.facebook import FacebookAdapter
-from app.models.campaign import PlatformType
+from app.enums import PlatformType
 
 
 def get_adapter(platform: PlatformType) -> BasePlatformAdapter:

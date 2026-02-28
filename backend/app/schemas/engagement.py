@@ -4,7 +4,7 @@ Engagement Schemas
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
-from app.models.engagement import EngagementType
+from app.enums import EngagementType
 
 
 class EngagementBase(BaseModel):
