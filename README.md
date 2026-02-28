@@ -57,4 +57,6 @@ FACEBOOK_PAGE_ID=your_page_id
 
 ## License
 
-MIT
+Copyright © 2026 Omaxil Technologies. All rights reserved.
+
+This software is proprietary and confidential. Unauthorized copying, distribution, or use of this software is strictly prohibited.
