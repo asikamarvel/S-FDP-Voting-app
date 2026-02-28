@@ -1,7 +1,4 @@
-"""
-Instagram Platform Adapter
-Uses Instagram Graph API (Business/Creator accounts)
-"""
+"""Instagram Platform Adapter - Graph API"""
 import httpx
 from typing import List, AsyncGenerator, Optional
 import asyncio
@@ -12,16 +9,6 @@ from app.config import settings
 
 
 class InstagramAdapter(BasePlatformAdapter):
-    """
-    Instagram adapter using the Graph API.
-    Requires a Business or Creator account with proper permissions.
-    
-    LIMITATIONS:
-    - Instagram Graph API does NOT expose follower lists (privacy)
-    - Instagram Graph API does NOT expose who liked a post (only counts)
-    - Comments ARE accessible with usernames
-    """
-    
     BASE_URL = "https://graph.facebook.com/v18.0"
     
     def __init__(self):
@@ -34,18 +21,17 @@ class InstagramAdapter(BasePlatformAdapter):
     
     @property
     def supports_follower_list(self) -> bool:
-        return False  # Instagram Graph API doesn't expose follower lists
+        return False
     
     @property
     def supports_likes(self) -> bool:
-        return False  # Instagram only provides like counts, not who liked
+        return False
     
     @property
     def supports_comments(self) -> bool:
         return True
     
     async def _make_request(self, endpoint: str, params: dict = None) -> dict:
-        """Make an authenticated request to the Graph API"""
         if params is None:
             params = {}
         params["access_token"] = self.access_token
@@ -60,9 +46,6 @@ class InstagramAdapter(BasePlatformAdapter):
             return response.json()
     
     async def fetch_post_details(self, post_id: str) -> dict:
-        """
-        Fetch post details including caption, like count, and comments count.
-        """
         try:
             data = await self._make_request(post_id, {
                 "fields": "id,caption,timestamp,like_count,comments_count,permalink"
@@ -84,35 +67,22 @@ class InstagramAdapter(BasePlatformAdapter):
         account_id: str,
         max_results: Optional[int] = None
     ) -> AsyncGenerator[List[NormalizedUser], None]:
-        """
-        Instagram Graph API does NOT expose follower lists.
-        This method exists for interface compatibility but yields nothing.
-        """
-        # Instagram doesn't provide follower list access via API for privacy
         return
-        yield  # Make this a generator
+        yield
     
     async def fetch_post_likes(
         self,
         post_id: str,
         max_results: Optional[int] = None
     ) -> AsyncGenerator[List[NormalizedEngagement], None]:
-        """
-        Instagram Graph API does NOT expose who liked a post (only counts).
-        This method exists for interface compatibility but yields nothing.
-        """
-        # Instagram doesn't provide a list of users who liked a post
         return
-        yield  # Make this a generator
+        yield
     
     async def fetch_post_comments(
         self,
         post_id: str,
         max_results: Optional[int] = None
     ) -> AsyncGenerator[List[NormalizedEngagement], None]:
-        """
-        Fetch users who commented on an Instagram post.
-        """
         cursor = None
         fetched = 0
         batch_size = 100
@@ -149,7 +119,6 @@ class InstagramAdapter(BasePlatformAdapter):
                     yield engagements
                     fetched += len(engagements)
                 
-                # Check pagination
                 paging = data.get("paging", {})
                 cursor = paging.get("cursors", {}).get("after")
                 

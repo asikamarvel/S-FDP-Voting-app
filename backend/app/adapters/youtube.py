@@ -1,8 +1,4 @@
-"""
-YouTube Platform Adapter
-Uses YouTube Data API v3
-Note: YouTube doesn't expose subscriber lists - comment-only validation
-"""
+"""YouTube Platform Adapter - Data API v3"""
 import httpx
 from typing import List, AsyncGenerator, Optional
 import asyncio
@@ -13,12 +9,6 @@ from app.config import settings
 
 
 class YouTubeAdapter(BasePlatformAdapter):
-    """
-    YouTube adapter using Data API v3.
-    IMPORTANT: YouTube does NOT expose subscriber lists.
-    Validation is comment-based only.
-    """
-    
     BASE_URL = "https://www.googleapis.com/youtube/v3"
     
     def __init__(self):
@@ -30,18 +20,17 @@ class YouTubeAdapter(BasePlatformAdapter):
     
     @property
     def supports_follower_list(self) -> bool:
-        return False  # YouTube doesn't expose subscriber lists
+        return False
     
     @property
     def supports_likes(self) -> bool:
-        return False  # YouTube doesn't expose who liked a video
+        return False
     
     @property
     def supports_comments(self) -> bool:
         return True
     
     async def _make_request(self, endpoint: str, params: dict = None) -> dict:
-        """Make a request to the YouTube API"""
         if params is None:
             params = {}
         params["key"] = self.api_key
@@ -56,9 +45,6 @@ class YouTubeAdapter(BasePlatformAdapter):
             return response.json()
     
     async def fetch_video_details(self, video_id: str) -> dict:
-        """
-        Fetch video details including title, description, and statistics.
-        """
         try:
             data = await self._make_request("videos", {
                 "part": "snippet,statistics",
@@ -90,25 +76,14 @@ class YouTubeAdapter(BasePlatformAdapter):
         account_id: str,
         max_results: Optional[int] = None
     ) -> AsyncGenerator[List[NormalizedUser], None]:
-        """
-        YouTube does NOT support fetching subscriber lists.
-        This method exists for interface compatibility but yields nothing.
-        """
-        # YouTube API doesn't expose subscriber lists for privacy reasons
-        # For YouTube campaigns, validation should be comment-based only
         return
-        yield  # Make this a generator
+        yield
     
     async def fetch_post_likes(
         self,
         post_id: str,
         max_results: Optional[int] = None
     ) -> AsyncGenerator[List[NormalizedEngagement], None]:
-        """
-        YouTube does NOT expose who liked a video.
-        This method exists for interface compatibility but yields nothing.
-        """
-        # YouTube doesn't provide a list of users who liked a video
         return
         yield
     
@@ -117,13 +92,9 @@ class YouTubeAdapter(BasePlatformAdapter):
         post_id: str,
         max_results: Optional[int] = None
     ) -> AsyncGenerator[List[NormalizedEngagement], None]:
-        """
-        Fetch comments on a YouTube video.
-        Uses commentThreads endpoint.
-        """
         page_token = None
         fetched = 0
-        batch_size = min(100, max_results or 100)  # YouTube max is 100
+        batch_size = min(100, max_results or 100)
         
         while True:
             params = {
@@ -141,8 +112,6 @@ class YouTubeAdapter(BasePlatformAdapter):
                 engagements = []
                 for item in data.get("items", []):
                     snippet = item.get("snippet", {}).get("topLevelComment", {}).get("snippet", {})
-                    
-                    # YouTube uses channel ID as user identifier
                     channel_id = snippet.get("authorChannelId", {}).get("value", "")
                     
                     timestamp = None
@@ -164,13 +133,11 @@ class YouTubeAdapter(BasePlatformAdapter):
                     yield engagements
                     fetched += len(engagements)
                 
-                # Check pagination
                 page_token = data.get("nextPageToken")
                 
                 if not page_token or (max_results and fetched >= max_results):
                     break
                 
-                # Rate limiting
                 await asyncio.sleep(0.5)
                 
             except httpx.HTTPStatusError as e:
@@ -184,15 +151,5 @@ class YouTubeAdapter(BasePlatformAdapter):
         channel_id: str,
         post_id: str
     ) -> AsyncGenerator[List[NormalizedEngagement], None]:
-        """
-        Alternative validation approach for YouTube:
-        Fetch commenters and check if they're subscribed via their public subscriptions.
-        
-        Note: This only works if the commenter has made their subscriptions public.
-        This is an optional enhanced validation method.
-        """
         async for batch in self.fetch_post_comments(post_id):
-            # For each commenter, we could potentially check their public subscriptions
-            # However, this is rate-limited and not always available
-            # Yielding comments as-is for basic validation
             yield batch

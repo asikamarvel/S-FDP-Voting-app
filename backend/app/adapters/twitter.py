@@ -1,7 +1,4 @@
-"""
-Twitter/X Platform Adapter
-Uses Twitter API v2
-"""
+"""Twitter/X Platform Adapter - API v2"""
 import httpx
 from typing import List, AsyncGenerator, Optional
 import asyncio
@@ -12,11 +9,6 @@ from app.config import settings
 
 
 class TwitterAdapter(BasePlatformAdapter):
-    """
-    Twitter/X adapter using API v2.
-    Note: Some endpoints may require paid API tiers.
-    """
-    
     BASE_URL = "https://api.twitter.com/2"
     
     def __init__(self):
@@ -32,19 +24,17 @@ class TwitterAdapter(BasePlatformAdapter):
     
     @property
     def supports_likes(self) -> bool:
-        return True  # Using retweeters as "likes" since liking_users requires OAuth User Context
+        return True
     
     @property
     def supports_comments(self) -> bool:
-        return True  # Replies/Quote tweets
+        return True
     
     async def _make_request(self, endpoint: str, params: dict = None) -> dict:
-        """Make an authenticated request to the Twitter API"""
         headers = {
             "Authorization": f"Bearer {self.bearer_token}",
             "Content-Type": "application/json"
         }
-        
         async with httpx.AsyncClient() as client:
             response = await client.get(
                 f"{self.BASE_URL}/{endpoint}",
@@ -60,13 +50,9 @@ class TwitterAdapter(BasePlatformAdapter):
         account_id: str,
         max_results: Optional[int] = None
     ) -> AsyncGenerator[List[NormalizedUser], None]:
-        """
-        Fetch followers for a Twitter account.
-        Uses GET /2/users/:id/followers
-        """
         pagination_token = None
         fetched = 0
-        batch_size = min(1000, max_results or 1000)  # Twitter max is 1000
+        batch_size = min(1000, max_results or 1000)
         
         while True:
             params = {
@@ -91,19 +77,16 @@ class TwitterAdapter(BasePlatformAdapter):
                     yield users
                     fetched += len(users)
                 
-                # Check pagination
                 meta = data.get("meta", {})
                 pagination_token = meta.get("next_token")
                 
                 if not pagination_token or (max_results and fetched >= max_results):
                     break
                 
-                # Rate limiting - Twitter has strict limits
                 await asyncio.sleep(1)
                 
             except httpx.HTTPStatusError as e:
                 if e.response.status_code == 429:
-                    # Rate limited - wait 15 minutes (Twitter reset window)
                     await asyncio.sleep(900)
                     continue
                 raise
@@ -113,13 +96,6 @@ class TwitterAdapter(BasePlatformAdapter):
         post_id: str,
         max_results: Optional[int] = None
     ) -> AsyncGenerator[List[NormalizedEngagement], None]:
-        """
-        Fetch users who retweeted a tweet (using retweets since likes require OAuth User Context).
-        Uses GET /2/tweets/:id/retweeted_by
-        
-        Note: Twitter's liking_users endpoint requires OAuth 2.0 User Context.
-        We use retweeters instead, which works with Bearer Token.
-        """
         pagination_token = None
         fetched = 0
         batch_size = min(100, max_results or 100)
@@ -140,7 +116,7 @@ class TwitterAdapter(BasePlatformAdapter):
                     engagements.append(NormalizedEngagement(
                         platform_user_id=user["id"],
                         username=user.get("username"),
-                        engagement_type="like",  # Treating retweets as engagement votes
+                        engagement_type="like",
                         engaged_at=datetime.utcnow()
                     ))
                 
@@ -148,7 +124,6 @@ class TwitterAdapter(BasePlatformAdapter):
                     yield engagements
                     fetched += len(engagements)
                 
-                # Check pagination
                 meta = data.get("meta", {})
                 pagination_token = meta.get("next_token")
                 
@@ -161,7 +136,6 @@ class TwitterAdapter(BasePlatformAdapter):
                 if e.response.status_code == 429:
                     await asyncio.sleep(900)
                     continue
-                # No data is fine - just means no retweets
                 if e.response.status_code == 404:
                     break
                 raise
@@ -171,16 +145,11 @@ class TwitterAdapter(BasePlatformAdapter):
         post_id: str,
         max_results: Optional[int] = None
     ) -> AsyncGenerator[List[NormalizedEngagement], None]:
-        """
-        Fetch replies to a tweet.
-        Uses Search API to find replies to the tweet.
-        """
         pagination_token = None
         fetched = 0
         batch_size = min(100, max_results or 100)
         
         while True:
-            # Search for replies to this tweet
             params = {
                 "query": f"conversation_id:{post_id}",
                 "tweet.fields": "author_id,created_at,text",
@@ -194,7 +163,6 @@ class TwitterAdapter(BasePlatformAdapter):
             try:
                 data = await self._make_request("tweets/search/recent", params)
                 
-                # Build user lookup from includes
                 user_lookup = {}
                 for user in data.get("includes", {}).get("users", []):
                     user_lookup[user["id"]] = user
@@ -223,7 +191,6 @@ class TwitterAdapter(BasePlatformAdapter):
                     yield engagements
                     fetched += len(engagements)
                 
-                # Check pagination
                 meta = data.get("meta", {})
                 pagination_token = meta.get("next_token")
                 
@@ -239,10 +206,6 @@ class TwitterAdapter(BasePlatformAdapter):
                 raise
 
     async def lookup_user_by_username(self, username: str) -> Optional[NormalizedUser]:
-        """
-        Look up a Twitter user by their username.
-        Uses GET /2/users/by/username/:username
-        """
         try:
             data = await self._make_request(
                 f"users/by/username/{username}",
@@ -264,10 +227,6 @@ class TwitterAdapter(BasePlatformAdapter):
             raise
 
     async def fetch_tweet_details(self, tweet_id: str) -> dict:
-        """
-        Fetch tweet details including public metrics (likes, retweets, etc).
-        Uses GET /2/tweets/:id with tweet.fields=public_metrics
-        """
         try:
             data = await self._make_request(
                 f"tweets/{tweet_id}",

@@ -1,7 +1,4 @@
-"""
-Platform Adapters
-Each adapter handles fetching followers and engagements from a specific platform.
-"""
+"""Platform Adapters"""
 from app.adapters.base import BasePlatformAdapter
 from app.adapters.instagram import InstagramAdapter
 from app.adapters.twitter import TwitterAdapter
@@ -12,7 +9,6 @@ from app.models.campaign import PlatformType
 
 
 def get_adapter(platform: PlatformType) -> BasePlatformAdapter:
-    """Factory function to get the appropriate adapter for a platform."""
     adapters = {
         PlatformType.INSTAGRAM: InstagramAdapter,
         PlatformType.TWITTER: TwitterAdapter,
@@ -23,7 +19,7 @@ def get_adapter(platform: PlatformType) -> BasePlatformAdapter:
     
     adapter_class = adapters.get(platform)
     if not adapter_class:
-        raise ValueError(f"No adapter available for platform: {platform}")
+        raise ValueError(f"No adapter for platform: {platform}")
     
     return adapter_class()
 
