@@ -1,9 +1,14 @@
 from pydantic_settings import BaseSettings
+from pydantic import AliasChoices, Field
 from functools import lru_cache
 
 
 class Settings(BaseSettings):
-    database_url: str = "sqlite+aiosqlite:///socialvote.db"
+    # Prefer POSTGRES_URL if set, else DATABASE_URL
+    database_url: str = Field(
+        default="sqlite+aiosqlite:///socialvote.db",
+        validation_alias=AliasChoices("POSTGRES_URL", "DATABASE_URL")
+    )
     redis_url: str = "redis://localhost:6379/0"
     
     instagram_access_token: str = ""
