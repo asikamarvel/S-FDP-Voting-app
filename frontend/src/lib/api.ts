@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// Production API URL - hardcoded for reliability
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://s-fdp-voting-app-production.up.railway.app';
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
