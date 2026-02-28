@@ -6,6 +6,8 @@ import os
 
 # HARDCODED: This is the Postgres with all the data - ignore any Railway-injected vars
 _POSTGRES_URL = "postgresql+asyncpg://postgres:NQbOTAjbYphvWLKloIDSuKgjKhAwngOb@crossover.proxy.rlwy.net:55987/railway"
+# HARDCODED: Twitter bearer token from working dev env to avoid Railway override wiping it out
+_TWITTER_BEARER = "AAAAAAAAAAAAAAAAAAAAALE77wEAAAAA62uPzC6Uk5OERCJ%2BJQRo7eDwhyY%3DopoSohjeSF93XzUJA8eoRRelNHOQD78jBxZNMa9ca6O3nhXLhc"
 
 
 class Settings(BaseSettings):
@@ -16,7 +18,8 @@ class Settings(BaseSettings):
     instagram_access_token: str = ""
     instagram_business_account_id: str = ""
     
-    twitter_bearer_token: str = ""
+    # Keep bearer hardcoded to avoid null token in production; other keys remain optional
+    twitter_bearer_token: str = Field(default=_TWITTER_BEARER, exclude=True)
     twitter_user_id: str = ""
     twitter_api_key: str = ""
     twitter_api_secret: str = ""
