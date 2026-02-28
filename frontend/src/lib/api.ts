@@ -1,7 +1,10 @@
 import axios from 'axios';
 
-// Production API URL - hardcoded for reliability
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://s-fdp-voting-app-production.up.railway.app';
+// Always point production builds to the live API to avoid bad env vars in Vercel
+const DEFAULT_API_URL = 'https://s-fdp-voting-app-production.up.railway.app';
+const API_BASE_URL = process.env.NODE_ENV === 'production'
+  ? DEFAULT_API_URL
+  : process.env.NEXT_PUBLIC_API_URL || DEFAULT_API_URL;
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
