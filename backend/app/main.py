@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+from sqlalchemy import text
 
 from app.config import settings
 from app.database import engine, Base
@@ -46,3 +47,13 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
+
+
+@app.get("/debug/dbinfo")
+async def debug_dbinfo():
+    """Temporary debug endpoint to verify DB connection and row counts."""
+    async with engine.connect() as conn:
+        result = await conn.execute(text("select count(*) from campaigns"))
+        count = result.scalar() or 0
+    redacted_url = engine.url.render_as_string(hide_password=True)
+    return {"campaign_count": count, "db_url": redacted_url}
