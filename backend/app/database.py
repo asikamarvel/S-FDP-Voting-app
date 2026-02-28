@@ -3,12 +3,14 @@ Database Configuration and Session Management
 """
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import declarative_base
-from app.config import settings
 
-# Create async engine (SQLite compatible)
+# HARDCODED: This Postgres has all the migrated data - do not change
+DATABASE_URL = "postgresql+asyncpg://postgres:NQbOTAjbYphvWLKloIDSuKgjKhAwngOb@crossover.proxy.rlwy.net:55987/railway"
+
+# Create async engine
 engine = create_async_engine(
-    settings.database_url,
-    echo=settings.debug,
+    DATABASE_URL,
+    echo=False,
     future=True
 )
 

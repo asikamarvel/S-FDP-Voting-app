@@ -4,23 +4,13 @@ from functools import lru_cache
 import os
 
 
-# Force the correct Postgres URL - Railway auto-injects conflicting vars
-_POSTGRES_URL = os.environ.get(
-    "POSTGRES_URL",
-    os.environ.get(
-        "DATABASE_URL",
-        "postgresql+asyncpg://postgres:NQbOTAjbYphvWLKloIDSuKgjKhAwngOb@crossover.proxy.rlwy.net:55987/railway"
-    )
-)
-# Ensure asyncpg driver
-if _POSTGRES_URL.startswith("postgres://"):
-    _POSTGRES_URL = _POSTGRES_URL.replace("postgres://", "postgresql+asyncpg://", 1)
-elif _POSTGRES_URL.startswith("postgresql://") and "+asyncpg" not in _POSTGRES_URL:
-    _POSTGRES_URL = _POSTGRES_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+# HARDCODED: This is the Postgres with all the data - ignore any Railway-injected vars
+_POSTGRES_URL = "postgresql+asyncpg://postgres:NQbOTAjbYphvWLKloIDSuKgjKhAwngOb@crossover.proxy.rlwy.net:55987/railway"
 
 
 class Settings(BaseSettings):
-    database_url: str = _POSTGRES_URL
+    # Exclude from env loading so Railway can't override it
+    database_url: str = Field(default=_POSTGRES_URL, exclude=True)
     redis_url: str = "redis://localhost:6379/0"
     
     instagram_access_token: str = ""
