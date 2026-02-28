@@ -197,6 +197,15 @@ class SyncService:
                         synced_comments += 1
                     
                     await self.db.commit()
+            else:
+                # Platform doesn't track comments - remove any stale COMMENT engagements
+                await self.db.execute(
+                    delete(Engagement).where(
+                        Engagement.post_id == post.id,
+                        Engagement.engagement_type == EngagementType.COMMENT
+                    )
+                )
+                await self.db.commit()
             
             # Update post last_synced_at
             post.last_synced_at = datetime.utcnow()
