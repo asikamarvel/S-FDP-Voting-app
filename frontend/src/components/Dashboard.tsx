@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   RefreshCw,
@@ -13,6 +14,7 @@ import {
   TrendingUp,
   Loader2,
   LogOut,
+  BarChart3,
 } from 'lucide-react';
 import {
   campaignApi,
@@ -39,6 +41,7 @@ const platforms: { key: PlatformKey; name: string; icon: string; color: string; 
 
 export function Dashboard() {
   const { logout } = useAuth();
+  const router = useRouter();
   const [activePlatform, setActivePlatform] = useState<PlatformKey>('twitter');
   const [showCampaignForm, setShowCampaignForm] = useState(false);
   const [showPostForm, setShowPostForm] = useState(false);
@@ -408,6 +411,14 @@ export function Dashboard() {
                       Validate All
                     </button>
                   )}
+
+                  <button
+                    onClick={() => router.push(`/performance?campaign=${activeCampaign.id}`)}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700"
+                  >
+                    <BarChart3 className="w-4 h-4" />
+                    See Performance
+                  </button>
                 </div>
               )}
             </div>
