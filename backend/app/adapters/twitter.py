@@ -28,7 +28,8 @@ class TwitterAdapter(BasePlatformAdapter):
     
     @property
     def supports_comments(self) -> bool:
-        return True
+        # Do not treat replies as engagements for validation; only retweets are tracked
+        return False
     
     async def _make_request(self, endpoint: str, params: dict = None) -> dict:
         headers = {
