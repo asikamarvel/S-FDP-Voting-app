@@ -6,6 +6,8 @@ python-multipart==0.0.6
 # Database
 sqlalchemy==2.0.25
 aiosqlite==0.19.0
+asyncpg==0.29.0
+pg8000==1.29.8
 alembic==1.13.1
 
 # Background tasks
