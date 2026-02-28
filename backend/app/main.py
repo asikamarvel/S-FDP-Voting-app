@@ -1,10 +1,30 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+import sys
+import os
 
-from app.config import settings
-from app.database import engine, Base
-from app.routers import campaigns, posts, platforms, validation, export, submissions
+print(f"[INIT] Python version: {sys.version}")
+print(f"[INIT] Working directory: {os.getcwd()}")
+
+# Try imports one by one with error handling
+try:
+    from app.config import settings
+    print("[INIT] config imported OK")
+except Exception as e:
+    print(f"[INIT] config import error: {e}")
+
+try:
+    from app.database import engine, Base
+    print("[INIT] database imported OK")
+except Exception as e:
+    print(f"[INIT] database import error: {e}")
+
+try:
+    from app.routers import campaigns, posts, platforms, validation, export, submissions
+    print("[INIT] routers imported OK")
+except Exception as e:
+    print(f"[INIT] routers import error: {e}")
 
 
 @asynccontextmanager
@@ -12,7 +32,10 @@ async def lifespan(app: FastAPI):
     print("[STARTUP] SocialVote API starting...")
     yield
     print("[SHUTDOWN] Disposing engine...")
-    await engine.dispose()
+    try:
+        await engine.dispose()
+    except:
+        pass
 
 
 app = FastAPI(
