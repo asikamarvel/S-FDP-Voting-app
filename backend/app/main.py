@@ -58,3 +58,27 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
+
+
+@app.get("/debug/db")
+async def debug_db():
+    """Debug endpoint to verify database connection and data"""
+    from sqlalchemy import text
+    from app.database import DATABASE_URL
+    
+    debug_info = {
+        "database_url_prefix": DATABASE_URL[:60] + "...",
+        "campaigns": [],
+        "error": None
+    }
+    
+    try:
+        async with engine.connect() as conn:
+            result = await conn.execute(text("SELECT id, name, platform FROM campaigns ORDER BY id"))
+            rows = result.fetchall()
+            debug_info["campaigns"] = [{"id": r[0], "name": r[1], "platform": r[2]} for r in rows]
+            debug_info["campaign_count"] = len(rows)
+    except Exception as e:
+        debug_info["error"] = str(e)
+    
+    return debug_info
