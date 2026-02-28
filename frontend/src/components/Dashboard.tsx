@@ -517,7 +517,8 @@ function PostCard({
   onValidate: () => void;
   onDelete: () => void;
 }) {
-  const totalVotes = post.valid_vote_count + post.invalid_vote_count;
+  // Invalid = Tracked - Valid, so totalVotes = engagement_count
+  const totalVotes = post.engagement_count;
   const validationRate = totalVotes > 0 ? ((post.valid_vote_count / totalVotes) * 100).toFixed(1) : '—';
 
   return (
@@ -634,7 +635,7 @@ function PostCard({
               <p className="text-xs text-primary-600/70">Valid (Followers)</p>
             </div>
             <div className="text-center p-3 bg-red-50 rounded-lg">
-              <p className="text-2xl font-bold text-red-600">{post.invalid_vote_count}</p>
+              <p className="text-2xl font-bold text-red-600">{post.engagement_count - post.valid_vote_count}</p>
               <p className="text-xs text-red-600/70">Invalid (Non-Followers)</p>
             </div>
           </div>
