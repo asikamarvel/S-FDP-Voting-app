@@ -13,6 +13,7 @@ from app.models.follower import Follower
 from app.models.engagement import Engagement
 from app.models.vote import Vote
 from app.schemas.vote import VoteResponse, ValidationResult
+from app.enums import PlatformType, EngagementType
 
 
 class ValidationService:
@@ -55,10 +56,14 @@ class ValidationService:
         # Get follower IDs as a set for fast lookup
         follower_ids = await self._get_follower_ids(campaign.id)
         
-        # Get all engagements for this post
-        engagements_result = await self.db.execute(
-            select(Engagement).where(Engagement.post_id == post.id)
-        )
+        # Get engagements for this post
+        engagements_query = select(Engagement).where(Engagement.post_id == post.id)
+
+        # Twitter: only validate retweets (stored as LIKE engagements)
+        if campaign.platform == PlatformType.TWITTER:
+            engagements_query = engagements_query.where(Engagement.engagement_type == EngagementType.LIKE)
+
+        engagements_result = await self.db.execute(engagements_query)
         engagements = engagements_result.scalars().all()
         
         votes = []

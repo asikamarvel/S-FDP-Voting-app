@@ -30,7 +30,7 @@ import { useAuth } from '@/lib/auth';
 type PlatformKey = 'twitter' | 'youtube' | 'instagram' | 'facebook';
 
 const platforms: { key: PlatformKey; name: string; icon: string; color: string; bgColor: string; engagementLabel: string; supportsValidation: boolean }[] = [
-  // X/Twitter: only retweets are tracked/validated
+  // X/Twitter: show API counts (retweets, likes, replies); only retweets are tracked/validated
   { key: 'twitter', name: 'X (Twitter)', icon: '𝕏', color: 'text-black', bgColor: 'bg-black', engagementLabel: 'Retweets', supportsValidation: true },
   { key: 'youtube', name: 'YouTube', icon: '▶', color: 'text-red-600', bgColor: 'bg-red-600', engagementLabel: 'Comments', supportsValidation: false },
   { key: 'instagram', name: 'Instagram', icon: '📷', color: 'text-pink-600', bgColor: 'bg-gradient-to-r from-purple-500 to-pink-500', engagementLabel: 'Comments', supportsValidation: false },
@@ -556,7 +556,7 @@ function PostCard({
       <div className="p-4">
         {/* Twitter: show API metrics; only retweets are tracked/validated */}
         {platform.key === 'twitter' && (
-          <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
+          <div className="grid grid-cols-3 gap-2 mb-3 text-sm">
             <div className="text-center p-2 bg-green-50 rounded-lg">
               <p className="text-lg font-bold text-green-600">{post.shares_count || 0}</p>
               <p className="text-xs text-green-600/70">Retweets (API)</p>
@@ -564,6 +564,10 @@ function PostCard({
             <div className="text-center p-2 bg-pink-50 rounded-lg">
               <p className="text-lg font-bold text-pink-600">{post.likes_count || 0}</p>
               <p className="text-xs text-pink-600/70">Likes (API)</p>
+            </div>
+            <div className="text-center p-2 bg-blue-50 rounded-lg">
+              <p className="text-lg font-bold text-blue-600">{post.comments_count || 0}</p>
+              <p className="text-xs text-blue-600/70">Replies (API, not tracked)</p>
             </div>
           </div>
         )}
