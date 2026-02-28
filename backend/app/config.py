@@ -8,6 +8,8 @@ import os
 _POSTGRES_URL = "postgresql+asyncpg://postgres:NQbOTAjbYphvWLKloIDSuKgjKhAwngOb@crossover.proxy.rlwy.net:55987/railway"
 # HARDCODED: Twitter bearer token from working dev env to avoid Railway override wiping it out
 _TWITTER_BEARER = "AAAAAAAAAAAAAAAAAAAAALE77wEAAAAA62uPzC6Uk5OERCJ%2BJQRo7eDwhyY%3DopoSohjeSF93XzUJA8eoRRelNHOQD78jBxZNMa9ca6O3nhXLhc"
+# HARDCODED: YouTube Data API v3 key
+_YOUTUBE_API_KEY = "AIzaSyCETBJYqxURzlNvMWuWh0_jjh7jHKVirbw"
 
 
 class Settings(BaseSettings):
@@ -24,7 +26,8 @@ class Settings(BaseSettings):
     twitter_api_key: str = ""
     twitter_api_secret: str = ""
     
-    youtube_api_key: str = ""
+    # YouTube API key hardcoded for production reliability
+    youtube_api_key: str = Field(default=_YOUTUBE_API_KEY, exclude=True)
     
     facebook_access_token: str = ""
     facebook_page_id: str = ""

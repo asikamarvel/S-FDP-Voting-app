@@ -15,6 +15,41 @@ import {
 } from 'recharts';
 import { campaignApi, postApi, Campaign, Post } from '@/lib/api';
 
+// Platform-specific chart configurations
+const platformCharts = {
+  twitter: {
+    charts: [
+      { key: 'likes', label: 'Likes', color: '#ec4899', bgClass: 'bg-pink-500' },
+      { key: 'replies', label: 'Replies', color: '#3b82f6', bgClass: 'bg-blue-500' },
+      { key: 'valid', label: 'Valid (Followers)', color: '#8b5cf6', bgClass: 'bg-purple-500' },
+    ],
+    tableHeaders: ['Likes', 'Replies', 'Valid (Followers)'],
+  },
+  youtube: {
+    charts: [
+      { key: 'views', label: 'Views', color: '#ef4444', bgClass: 'bg-red-500' },
+      { key: 'likes', label: 'Likes', color: '#ec4899', bgClass: 'bg-pink-500' },
+      { key: 'comments', label: 'Comments', color: '#3b82f6', bgClass: 'bg-blue-500' },
+    ],
+    tableHeaders: ['Views', 'Likes', 'Comments'],
+  },
+  instagram: {
+    charts: [
+      { key: 'likes', label: 'Likes', color: '#ec4899', bgClass: 'bg-pink-500' },
+      { key: 'comments', label: 'Comments', color: '#3b82f6', bgClass: 'bg-blue-500' },
+    ],
+    tableHeaders: ['Likes', 'Comments'],
+  },
+  facebook: {
+    charts: [
+      { key: 'reactions', label: 'Reactions', color: '#ec4899', bgClass: 'bg-pink-500' },
+      { key: 'comments', label: 'Comments', color: '#3b82f6', bgClass: 'bg-blue-500' },
+      { key: 'shares', label: 'Shares', color: '#22c55e', bgClass: 'bg-green-500' },
+    ],
+    tableHeaders: ['Reactions', 'Comments', 'Shares'],
+  },
+};
+
 export function PerformanceDashboard() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -30,6 +65,9 @@ export function PerformanceDashboard() {
   const selectedCampaign = campaignId
     ? campaignsData?.campaigns?.find(c => c.id === Number(campaignId))
     : campaignsData?.campaigns?.[0];
+
+  const platform = selectedCampaign?.platform || 'twitter';
+  const chartConfig = platformCharts[platform as keyof typeof platformCharts] || platformCharts.twitter;
 
   // Fetch posts for the campaign
   const { data: postsData, isLoading: loadingPosts } = useQuery({
@@ -49,11 +87,33 @@ export function PerformanceDashboard() {
     return {
       name: label,
       postId: post.platform_post_id,
+      // Common metrics
       likes: post.likes_count || 0,
+      comments: post.comments_count || 0,
+      // Twitter-specific
       replies: post.comments_count || 0,
       valid: post.valid_vote_count || 0,
+      // YouTube-specific
+      views: post.views_count || 0,
+      // Facebook-specific
+      reactions: post.likes_count || 0,
+      shares: post.shares_count || 0,
     };
   });
+
+  // Get value for a specific metric key from a post
+  const getMetricValue = (post: Post, key: string): number => {
+    switch (key) {
+      case 'likes': return post.likes_count || 0;
+      case 'comments': return post.comments_count || 0;
+      case 'replies': return post.comments_count || 0;
+      case 'valid': return post.valid_vote_count || 0;
+      case 'views': return post.views_count || 0;
+      case 'reactions': return post.likes_count || 0;
+      case 'shares': return post.shares_count || 0;
+      default: return 0;
+    }
+  };
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -137,105 +197,48 @@ export function PerformanceDashboard() {
               <div className="bg-white rounded-2xl border border-gray-200 p-6">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">{selectedCampaign.name}</h2>
                 <div className="flex items-center gap-6 text-sm text-gray-500">
+                  <span className="capitalize">{platform}</span>
                   <span>@{selectedCampaign.official_account_username || selectedCampaign.official_account_id}</span>
                   <span>{posts.length} posts tracked</span>
-                  <span>{selectedCampaign.follower_count.toLocaleString()} followers</span>
+                  {platform === 'twitter' && (
+                    <span>{selectedCampaign.follower_count.toLocaleString()} followers</span>
+                  )}
                 </div>
               </div>
             )}
 
-            {/* Likes Chart */}
-            <div className="bg-white rounded-2xl border border-gray-200 p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                <span className="w-3 h-3 bg-pink-500 rounded-full"></span>
-                Likes Comparison
-              </h3>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis 
-                      dataKey="name" 
-                      angle={-45} 
-                      textAnchor="end" 
-                      interval={0}
-                      tick={{ fontSize: 12 }}
-                      height={80}
-                    />
-                    <YAxis tick={{ fontSize: 12 }} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Bar 
-                      dataKey="likes" 
-                      name="Likes" 
-                      fill="#ec4899" 
-                      radius={[4, 4, 0, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
+            {/* Dynamic Charts based on platform */}
+            {chartConfig.charts.map((chart) => (
+              <div key={chart.key} className="bg-white rounded-2xl border border-gray-200 p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                  <span className={`w-3 h-3 ${chart.bgClass} rounded-full`}></span>
+                  {chart.label} Comparison
+                </h3>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis 
+                        dataKey="name" 
+                        angle={-45} 
+                        textAnchor="end" 
+                        interval={0}
+                        tick={{ fontSize: 12 }}
+                        height={80}
+                      />
+                      <YAxis tick={{ fontSize: 12 }} />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Bar 
+                        dataKey={chart.key} 
+                        name={chart.label} 
+                        fill={chart.color} 
+                        radius={[4, 4, 0, 0]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
-            </div>
-
-            {/* Replies Chart */}
-            <div className="bg-white rounded-2xl border border-gray-200 p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                <span className="w-3 h-3 bg-blue-500 rounded-full"></span>
-                Replies Comparison
-              </h3>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis 
-                      dataKey="name" 
-                      angle={-45} 
-                      textAnchor="end" 
-                      interval={0}
-                      tick={{ fontSize: 12 }}
-                      height={80}
-                    />
-                    <YAxis tick={{ fontSize: 12 }} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Bar 
-                      dataKey="replies" 
-                      name="Replies" 
-                      fill="#3b82f6" 
-                      radius={[4, 4, 0, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Valid (Followers) Chart */}
-            <div className="bg-white rounded-2xl border border-gray-200 p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                <span className="w-3 h-3 bg-primary-500 rounded-full"></span>
-                Valid Votes (Followers) Comparison
-              </h3>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis 
-                      dataKey="name" 
-                      angle={-45} 
-                      textAnchor="end" 
-                      interval={0}
-                      tick={{ fontSize: 12 }}
-                      height={80}
-                    />
-                    <YAxis tick={{ fontSize: 12 }} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Bar 
-                      dataKey="valid" 
-                      name="Valid (Followers)" 
-                      fill="#8b5cf6" 
-                      radius={[4, 4, 0, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
+            ))}
 
             {/* Summary Table */}
             <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
@@ -247,9 +250,11 @@ export function PerformanceDashboard() {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Post</th>
-                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Likes</th>
-                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Replies</th>
-                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Valid (Followers)</th>
+                      {chartConfig.charts.map((chart) => (
+                        <th key={chart.key} className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          {chart.label}
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -261,36 +266,26 @@ export function PerformanceDashboard() {
                           </div>
                           <div className="text-xs text-gray-400 font-mono">{post.platform_post_id}</div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-center">
-                          <span className="text-sm font-bold text-pink-600">{(post.likes_count || 0).toLocaleString()}</span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-center">
-                          <span className="text-sm font-bold text-blue-600">{(post.comments_count || 0).toLocaleString()}</span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-center">
-                          <span className="text-sm font-bold text-primary-600">{(post.valid_vote_count || 0).toLocaleString()}</span>
-                        </td>
+                        {chartConfig.charts.map((chart) => (
+                          <td key={chart.key} className="px-6 py-4 whitespace-nowrap text-center">
+                            <span className="text-sm font-bold" style={{ color: chart.color }}>
+                              {getMetricValue(post, chart.key).toLocaleString()}
+                            </span>
+                          </td>
+                        ))}
                       </tr>
                     ))}
                   </tbody>
                   <tfoot className="bg-gray-50">
                     <tr>
                       <td className="px-6 py-4 text-sm font-bold text-gray-900">Total</td>
-                      <td className="px-6 py-4 text-center">
-                        <span className="text-sm font-bold text-pink-600">
-                          {posts.reduce((sum, p) => sum + (p.likes_count || 0), 0).toLocaleString()}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <span className="text-sm font-bold text-blue-600">
-                          {posts.reduce((sum, p) => sum + (p.comments_count || 0), 0).toLocaleString()}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <span className="text-sm font-bold text-primary-600">
-                          {posts.reduce((sum, p) => sum + (p.valid_vote_count || 0), 0).toLocaleString()}
-                        </span>
-                      </td>
+                      {chartConfig.charts.map((chart) => (
+                        <td key={chart.key} className="px-6 py-4 text-center">
+                          <span className="text-sm font-bold" style={{ color: chart.color }}>
+                            {posts.reduce((sum, p) => sum + getMetricValue(p, chart.key), 0).toLocaleString()}
+                          </span>
+                        </td>
+                      ))}
                     </tr>
                   </tfoot>
                 </table>
