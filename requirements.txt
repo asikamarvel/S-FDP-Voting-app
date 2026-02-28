@@ -1,2 +1,1 @@
-# Root requirements file - references backend dependencies
--r backend/requirements.txt
+# Root requirements file left empty; backend dependencies are installed via Dockerfile

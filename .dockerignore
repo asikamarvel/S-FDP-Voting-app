@@ -1,0 +1,14 @@
+node_modules
+frontend
+.git
+*.log
+__pycache__
+*.pyc
+.venv
+venv
+dist
+build
+.next
+*.db
+*.sqlite
+*.sqlite3
