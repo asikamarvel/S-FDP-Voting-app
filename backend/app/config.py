@@ -1,14 +1,26 @@
 from pydantic_settings import BaseSettings
-from pydantic import AliasChoices, Field
+from pydantic import Field
 from functools import lru_cache
+import os
+
+
+# Force the correct Postgres URL - Railway auto-injects conflicting vars
+_POSTGRES_URL = os.environ.get(
+    "POSTGRES_URL",
+    os.environ.get(
+        "DATABASE_URL",
+        "postgresql+asyncpg://postgres:NQbOTAjbYphvWLKloIDSuKgjKhAwngOb@crossover.proxy.rlwy.net:55987/railway"
+    )
+)
+# Ensure asyncpg driver
+if _POSTGRES_URL.startswith("postgres://"):
+    _POSTGRES_URL = _POSTGRES_URL.replace("postgres://", "postgresql+asyncpg://", 1)
+elif _POSTGRES_URL.startswith("postgresql://") and "+asyncpg" not in _POSTGRES_URL:
+    _POSTGRES_URL = _POSTGRES_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
 
 class Settings(BaseSettings):
-    # Prefer POSTGRES_URL if set, else DATABASE_URL
-    database_url: str = Field(
-        default="sqlite+aiosqlite:///socialvote.db",
-        validation_alias=AliasChoices("POSTGRES_URL", "DATABASE_URL")
-    )
+    database_url: str = _POSTGRES_URL
     redis_url: str = "redis://localhost:6379/0"
     
     instagram_access_token: str = ""
