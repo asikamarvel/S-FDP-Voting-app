@@ -13,15 +13,19 @@ async def lifespan(app: FastAPI):
     from app.database import DATABASE_URL
     print(f"[STARTUP] Connecting to database: {DATABASE_URL[:50]}...")
     
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    # Skip create_all since tables already exist and may conflict with enum definitions
+    # async with engine.begin() as conn:
+    #     await conn.run_sync(Base.metadata.create_all)
     
     # Log campaign count at startup
     from sqlalchemy import text
-    async with engine.connect() as conn:
-        result = await conn.execute(text("SELECT COUNT(*) FROM campaigns"))
-        count = result.scalar()
-        print(f"[STARTUP] Found {count} campaigns in database")
+    try:
+        async with engine.connect() as conn:
+            result = await conn.execute(text("SELECT COUNT(*) FROM campaigns"))
+            count = result.scalar()
+            print(f"[STARTUP] Found {count} campaigns in database")
+    except Exception as e:
+        print(f"[STARTUP] Error checking campaigns: {e}")
     
     yield
     await engine.dispose()
