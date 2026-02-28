@@ -48,18 +48,22 @@ export function Dashboard() {
   const [validatingPosts, setValidatingPosts] = useState<Set<number>>(new Set());
   const [syncingAll, setSyncingAll] = useState(false);
   const [validatingAll, setValidatingAll] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
   
   const queryClient = useQueryClient();
-  const forceRefresh = () => setRefreshKey(k => k + 1);
+  // Smooth refresh - keeps existing data visible while fetching in background
+  const forceRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['posts'] });
+    queryClient.invalidateQueries({ queryKey: ['campaigns'] });
+  };
 
   // Get platform config
   const currentPlatform = platforms.find(p => p.key === activePlatform)!;
 
   // Fetch campaigns for current platform
   const { data: campaignsData, isLoading: loadingCampaigns } = useQuery({
-    queryKey: ['campaigns', refreshKey],
+    queryKey: ['campaigns'],
     queryFn: campaignApi.list,
+    placeholderData: (prev) => prev, // Keep showing old data while refetching
   });
 
   // Filter campaigns for active platform
@@ -77,12 +81,14 @@ export function Dashboard() {
 
   // Fetch posts for active campaign
   const { data: postsData, isLoading: loadingPosts } = useQuery({
-    queryKey: ['posts', activeCampaign?.id, refreshKey],
+    queryKey: ['posts', activeCampaign?.id],
     queryFn: () => postApi.list(activeCampaign?.id),
     enabled: !!activeCampaign,
+    placeholderData: (prev) => prev, // Keep showing old data while refetching
   });
 
-  const posts = postsData?.posts || [];
+  // Sort posts by ID to keep consistent order
+  const posts = [...(postsData?.posts || [])].sort((a, b) => a.id - b.id);
 
   // Sync single post
   const syncPostMutation = useMutation({
