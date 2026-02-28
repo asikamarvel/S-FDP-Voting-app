@@ -177,10 +177,39 @@ export function Dashboard() {
     }
   };
 
-  // Validate all posts
+  // Validate all posts (full workflow: sync followers -> sync posts -> validate)
   const validateAllPosts = async () => {
+    if (!activeCampaign) return;
     setValidatingAll(true);
     try {
+      // Step 1: Sync followers
+      setStatusMessage({ type: 'success', text: 'Step 1/3: Syncing followers...' });
+      try {
+        await platformApi.syncFollowers(activePlatform, activeCampaign.id);
+      } catch (e) {
+        console.error('Failed to sync followers', e);
+      }
+      forceRefresh();
+
+      // Step 2: Sync all posts
+      setStatusMessage({ type: 'success', text: 'Step 2/3: Syncing all posts...' });
+      for (const post of posts) {
+        setSyncingPosts(prev => new Set(prev).add(post.id));
+        try {
+          await platformApi.syncEngagements(activePlatform, post.id);
+        } catch (e) {
+          console.error(`Failed to sync post ${post.id}`, e);
+        }
+        setSyncingPosts(prev => {
+          const next = new Set(prev);
+          next.delete(post.id);
+          return next;
+        });
+      }
+      forceRefresh();
+
+      // Step 3: Validate all posts
+      setStatusMessage({ type: 'success', text: 'Step 3/3: Validating all posts...' });
       for (const post of posts) {
         setValidatingPosts(prev => new Set(prev).add(post.id));
         try {
@@ -195,8 +224,8 @@ export function Dashboard() {
         });
       }
       forceRefresh();
-      setStatusMessage({ type: 'success', text: `Validated all ${posts.length} posts` });
-      setTimeout(() => setStatusMessage(null), 3000);
+      setStatusMessage({ type: 'success', text: `✓ Complete! Synced followers, ${posts.length} posts, and validated all` });
+      setTimeout(() => setStatusMessage(null), 5000);
     } finally {
       setValidatingAll(false);
     }
