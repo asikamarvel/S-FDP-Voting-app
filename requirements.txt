@@ -1,1 +1,2 @@
-# Root requirements file left empty; backend dependencies are installed via Dockerfile
+# Root requirements file - include backend dependencies for Railway
+-r backend/requirements.txt
