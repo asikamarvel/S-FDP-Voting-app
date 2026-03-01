@@ -13,37 +13,37 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
+  PieChart,
+  Pie,
+  Cell,
 } from 'recharts';
 import { campaignApi, postApi, Post } from '@/lib/api';
 import { SFDPFooter } from './Footer';
 
-// Platform-specific chart configurations
-const platformCharts = {
+// SFDP Brand Colors
+const CHART_COLORS = ['#171c2e', '#3d4a7a', '#6b7db3', '#d97706', '#f59e0b', '#252e54'];
+
+// Platform configurations - Only X and YouTube
+type PlatformKey = 'twitter' | 'youtube';
+
+const platformConfigs: Record<PlatformKey, { name: string; icon: string; bgColor: string; metrics: { key: string; label: string; color: string }[] }> = {
   twitter: {
+    name: 'X (Twitter)',
+    icon: '𝕏',
+    bgColor: 'bg-black',
     metrics: [
-      { key: 'likes', label: 'Likes', color: '#f472b6' },
-      { key: 'replies', label: 'Replies', color: '#60a5fa' },
-      { key: 'valid', label: 'Valid Followers', color: '#a78bfa' },
+      { key: 'likes', label: 'Likes', color: '#171c2e' },
+      { key: 'comments', label: 'Comments', color: '#3d4a7a' },
+      { key: 'valid', label: 'Valid Retweets', color: '#d97706' },
     ],
   },
   youtube: {
+    name: 'YouTube',
+    icon: '▶',
+    bgColor: 'bg-red-600',
     metrics: [
-      { key: 'views', label: 'Views', color: '#f87171' },
-      { key: 'likes', label: 'Likes', color: '#f472b6' },
-      { key: 'uniqueCommenters', label: 'Unique Commenters', color: '#60a5fa' },
-    ],
-  },
-  instagram: {
-    metrics: [
-      { key: 'likes', label: 'Likes', color: '#f472b6' },
-      { key: 'comments', label: 'Comments', color: '#60a5fa' },
-    ],
-  },
-  facebook: {
-    metrics: [
-      { key: 'reactions', label: 'Reactions', color: '#f472b6' },
-      { key: 'comments', label: 'Comments', color: '#60a5fa' },
-      { key: 'shares', label: 'Shares', color: '#4ade80' },
+      { key: 'likes', label: 'Likes', color: '#171c2e' },
+      { key: 'uniqueCommenters', label: 'Unique Comments', color: '#d97706' },
     ],
   },
 };
@@ -59,6 +59,7 @@ export function PerformanceDashboard({ isPublic = false, publicCampaignId }: Per
   const campaignId = publicCampaignId || searchParams.get('campaign');
   const [showShareModal, setShowShareModal] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [activePlatform, setActivePlatform] = useState<PlatformKey>('twitter');
 
   // Fetch campaigns
   const { data: campaignsData, isLoading: loadingCampaigns } = useQuery({
@@ -66,13 +67,13 @@ export function PerformanceDashboard({ isPublic = false, publicCampaignId }: Per
     queryFn: campaignApi.list,
   });
 
-  // Get selected campaign
-  const selectedCampaign = campaignId
-    ? campaignsData?.campaigns?.find(c => c.id === Number(campaignId))
-    : campaignsData?.campaigns?.[0];
+  // Get campaigns for each platform
+  const twitterCampaign = campaignsData?.campaigns?.find(c => c.platform === 'twitter');
+  const youtubeCampaign = campaignsData?.campaigns?.find(c => c.platform === 'youtube');
 
-  const platform = selectedCampaign?.platform || 'twitter';
-  const chartConfig = platformCharts[platform as keyof typeof platformCharts] || platformCharts.twitter;
+  // Select campaign based on active platform
+  const selectedCampaign = activePlatform === 'twitter' ? twitterCampaign : youtubeCampaign;
+  const platformConfig = platformConfigs[activePlatform];
 
   // Fetch posts for the campaign
   const { data: postsData, isLoading: loadingPosts } = useQuery({
@@ -89,11 +90,7 @@ export function PerformanceDashboard({ isPublic = false, publicCampaignId }: Per
     switch (key) {
       case 'likes': return post.likes_count || 0;
       case 'comments': return post.comments_count || 0;
-      case 'replies': return post.comments_count || 0;
       case 'valid': return post.valid_vote_count || 0;
-      case 'views': return post.views_count || 0;
-      case 'reactions': return post.likes_count || 0;
-      case 'shares': return post.shares_count || 0;
       case 'uniqueCommenters': return post.engagement_count || 0;
       default: return 0;
     }
@@ -106,21 +103,35 @@ export function PerformanceDashboard({ isPublic = false, publicCampaignId }: Per
       : `Post ${index + 1}`;
     
     const data: Record<string, string | number> = { name: label, postId: post.platform_post_id };
-    chartConfig.metrics.forEach(metric => {
+    platformConfig.metrics.forEach(metric => {
       data[metric.key] = getMetricValue(post, metric.key);
     });
     return data;
   });
 
   // Prepare individual metric data for histogram charts
-  const getMetricChartData = (metricKey: string) => {
+  const getHistogramData = (metricKey: string) => {
     return posts.map((post, index) => ({
       name: post.caption 
-        ? (post.caption.length > 12 ? post.caption.substring(0, 12) + '...' : post.caption)
-        : `P${index + 1}`,
+        ? (post.caption.length > 12 ? post.caption.substring(0, 12) + '…' : post.caption)
+        : `Post ${index + 1}`,
       value: getMetricValue(post, metricKey),
-      postId: post.platform_post_id,
+      fullName: post.caption || `Post ${index + 1}`,
     }));
+  };
+
+  // Prepare pie chart data - distribution among posts
+  const getPieData = () => {
+    return posts.map((post, index) => {
+      const total = platformConfig.metrics.reduce((sum, m) => sum + getMetricValue(post, m.key), 0);
+      return {
+        name: post.caption 
+          ? (post.caption.length > 15 ? post.caption.substring(0, 15) + '…' : post.caption)
+          : `Post ${index + 1}`,
+        value: total,
+        color: CHART_COLORS[index % CHART_COLORS.length],
+      };
+    });
   };
 
   // Generate share URL
@@ -134,18 +145,26 @@ export function PerformanceDashboard({ isPublic = false, publicCampaignId }: Per
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const HistogramTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-gray-900 text-white rounded-lg shadow-xl px-3 py-2 text-sm">
-          <p className="font-medium mb-1 text-gray-300">{label}</p>
-          {payload.map((item: any, index: number) => (
-            <p key={index} className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }}></span>
-              <span className="text-gray-400">{item.name}:</span>
-              <span className="font-bold">{item.value.toLocaleString()}</span>
-            </p>
-          ))}
+        <div className="bg-gray-900/95 backdrop-blur text-white rounded-lg shadow-2xl px-4 py-3 border border-gray-700">
+          <p className="text-xs text-gray-400 mb-1">{payload[0]?.payload?.fullName || label}</p>
+          <p className="font-bold text-xl">{payload[0].value.toLocaleString()}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const PieTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const total = posts.reduce((sum, p) => sum + platformConfig.metrics.reduce((s, m) => s + getMetricValue(p, m.key), 0), 0);
+      return (
+        <div className="bg-gray-900/95 backdrop-blur text-white rounded-lg shadow-2xl px-4 py-3 border border-gray-700">
+          <p className="text-xs text-gray-400 mb-1">{payload[0].name}</p>
+          <p className="font-bold text-xl">{payload[0].value.toLocaleString()}</p>
+          <p className="text-xs text-gray-400">{((payload[0].value / total) * 100).toFixed(1)}%</p>
         </div>
       );
     }
@@ -243,9 +262,48 @@ export function PerformanceDashboard({ isPublic = false, publicCampaignId }: Per
       </header>
 
       <div className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 py-6">
+        {/* Platform Toggle Buttons */}
+        <div className="flex justify-center gap-3 mb-6">
+          {(Object.keys(platformConfigs) as PlatformKey[]).map((platform) => {
+            const config = platformConfigs[platform];
+            const hasCampaign = platform === 'twitter' ? !!twitterCampaign : !!youtubeCampaign;
+            return (
+              <button
+                key={platform}
+                onClick={() => setActivePlatform(platform)}
+                disabled={!hasCampaign}
+                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
+                  activePlatform === platform
+                    ? `${config.bgColor} text-white shadow-lg scale-105`
+                    : hasCampaign
+                      ? 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 shadow-sm'
+                      : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+                }`}
+              >
+                <span className="text-xl">{config.icon}</span>
+                <span>{config.name}</span>
+              </button>
+            );
+          })}
+        </div>
+
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
+          </div>
+        ) : !selectedCampaign ? (
+          <div className="text-center py-16 bg-white rounded-2xl border border-gray-200 shadow-sm">
+            <BarChart3 className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+            <p className="text-lg font-medium text-gray-600">No campaign found for {platformConfig.name}</p>
+            <p className="text-gray-400 text-sm mt-1">Please set up a campaign first.</p>
+            {!isPublic && (
+              <button
+                onClick={() => router.push('/')}
+                className="mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
+              >
+                Go to Dashboard
+              </button>
+            )}
           </div>
         ) : posts.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-2xl border border-gray-200 shadow-sm">
@@ -262,77 +320,82 @@ export function PerformanceDashboard({ isPublic = false, publicCampaignId }: Per
             )}
           </div>
         ) : (
-          <div className="space-y-4">
-            {/* Campaign Header Card */}
-            {selectedCampaign && (
-              <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-900">{selectedCampaign.name}</h2>
-                    <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
-                      <span className="capitalize px-2.5 py-1 bg-primary-50 text-primary-700 rounded-full font-medium">{platform}</span>
-                      <span className="flex items-center gap-1">
-                        <span className="text-gray-400">@</span>
-                        {selectedCampaign.official_account_username || selectedCampaign.official_account_id}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <BarChart3 className="w-3.5 h-3.5" />
-                        {posts.length} posts
-                      </span>
-                      {platform === 'twitter' && (
-                        <span>{selectedCampaign.follower_count.toLocaleString()} followers</span>
-                      )}
-                    </div>
-                  </div>
-                  {/* Summary Stats */}
-                  <div className="flex gap-4">
-                    {chartConfig.metrics.map((metric) => (
-                      <div key={metric.key} className="text-center">
-                        <p className="text-xl font-bold" style={{ color: metric.color }}>
-                          {posts.reduce((sum, p) => sum + getMetricValue(p, metric.key), 0).toLocaleString()}
-                        </p>
-                        <p className="text-xs text-gray-500">{metric.label}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+          <div className="space-y-6">
+            {/* Pie Chart - Data Distribution Among Posts */}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
+                Engagement Distribution by Post
+              </h3>
+              <div className="h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={getPieData()}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={100}
+                      innerRadius={40}
+                      dataKey="value"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                    >
+                      {getPieData().map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={<PieTooltip />} />
+                  </PieChart>
+                </ResponsiveContainer>
               </div>
-            )}
+            </div>
 
-            {/* Three Histogram Charts in a Row */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {chartConfig.metrics.map((metric) => {
-                const data = getMetricChartData(metric.key);
+            {/* Histogram Charts with Visible X and Y Axes */}
+            <div className={`grid gap-4 ${platformConfig.metrics.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-3'}`}>
+              {platformConfig.metrics.map((metric) => {
+                const data = getHistogramData(metric.key);
+                const maxValue = Math.max(...data.map(d => d.value));
+                
                 return (
-                  <div key={metric.key} className="bg-white rounded-xl border border-gray-200 p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: metric.color }}></span>
-                      <h3 className="text-sm font-semibold text-gray-700">{metric.label}</h3>
+                  <div key={metric.key} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                    {/* Card Header */}
+                    <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: metric.color }}></div>
+                          <h3 className="text-sm font-semibold text-gray-800">{metric.label}</h3>
+                        </div>
+                        <span className="text-lg font-bold" style={{ color: metric.color }}>
+                          {posts.reduce((sum, p) => sum + getMetricValue(p, metric.key), 0).toLocaleString()}
+                        </span>
+                      </div>
                     </div>
-                    <div className="h-48">
+                    
+                    {/* Histogram Chart with Axes */}
+                    <div className="p-4 h-56">
                       <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={data} margin={{ top: 5, right: 5, left: 0, bottom: 30 }}>
+                        <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 40 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
                           <XAxis 
                             dataKey="name" 
                             angle={-45} 
                             textAnchor="end" 
                             interval={0}
-                            tick={{ fontSize: 9, fill: '#9ca3af' }}
-                            axisLine={{ stroke: '#e5e7eb' }}
-                            tickLine={false}
+                            tick={{ fontSize: 10, fill: '#6b7280' }}
+                            axisLine={{ stroke: '#d1d5db' }}
+                            tickLine={{ stroke: '#d1d5db' }}
                           />
                           <YAxis 
-                            tick={{ fontSize: 9, fill: '#9ca3af' }}
-                            axisLine={false}
-                            tickLine={false}
-                            width={35}
+                            tick={{ fontSize: 10, fill: '#6b7280' }}
+                            axisLine={{ stroke: '#d1d5db' }}
+                            tickLine={{ stroke: '#d1d5db' }}
+                            tickFormatter={(value) => value >= 1000 ? `${(value / 1000).toFixed(0)}k` : value}
+                            domain={[0, Math.ceil(maxValue * 1.1)]}
                           />
-                          <Tooltip content={<SimpleTooltip />} cursor={{ fill: 'rgba(0,0,0,0.04)' }} />
+                          <Tooltip content={<HistogramTooltip />} cursor={{ fill: 'rgba(23, 28, 46, 0.08)' }} />
                           <Bar 
                             dataKey="value" 
                             fill={metric.color}
-                            radius={[2, 2, 0, 0]}
-                            barSize={posts.length > 10 ? undefined : 24}
+                            radius={[4, 4, 0, 0]}
                           />
                         </BarChart>
                       </ResponsiveContainer>
@@ -342,87 +405,57 @@ export function PerformanceDashboard({ isPublic = false, publicCampaignId }: Per
               })}
             </div>
 
-            {/* Combined Comparison Chart */}
-            <div className="bg-white rounded-xl border border-gray-200 p-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">All Metrics Comparison</h3>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={combinedChartData} margin={{ top: 10, right: 10, left: 0, bottom: 40 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
-                    <XAxis 
-                      dataKey="name" 
-                      angle={-45} 
-                      textAnchor="end" 
-                      interval={0}
-                      tick={{ fontSize: 10, fill: '#6b7280' }}
-                      axisLine={{ stroke: '#e5e7eb' }}
-                      tickLine={false}
-                    />
-                    <YAxis 
-                      tick={{ fontSize: 10, fill: '#6b7280' }}
-                      axisLine={false}
-                      tickLine={false}
-                      width={45}
-                    />
-                    <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0,0,0,0.04)' }} />
-                    <Legend 
-                      wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
-                      iconType="square"
-                      iconSize={10}
-                    />
-                    {chartConfig.metrics.map((metric) => (
-                      <Bar 
-                        key={metric.key}
-                        dataKey={metric.key} 
-                        name={metric.label} 
-                        fill={metric.color}
-                        radius={[2, 2, 0, 0]}
-                      />
-                    ))}
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Compact Summary Table */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-              <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-                <h3 className="text-sm font-semibold text-gray-700">Detailed Breakdown</h3>
+            {/* Detailed Table */}
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+              <div className="px-4 py-3 bg-gray-50/80 border-b border-gray-100">
+                <h3 className="text-sm font-semibold text-gray-800">Post-by-Post Breakdown</h3>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-gray-50/50">
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Post</th>
-                      {chartConfig.metrics.map((metric) => (
-                        <th key={metric.key} className="px-4 py-2 text-right text-xs font-medium uppercase" style={{ color: metric.color }}>
+                      <th className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Post</th>
+                      {platformConfig.metrics.map((metric) => (
+                        <th 
+                          key={metric.key} 
+                          className="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-wider"
+                          style={{ color: metric.color }}
+                        >
                           {metric.label}
                         </th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-gray-50">
                     {posts.map((post, index) => (
-                      <tr key={post.id} className="hover:bg-gray-50/50">
-                        <td className="px-4 py-2.5">
-                          <div className="font-medium text-gray-900 truncate max-w-[200px]">
+                      <tr key={post.id} className="hover:bg-primary-50/30 transition-colors">
+                        <td className="px-4 py-3">
+                          <div className="font-medium text-gray-900 truncate max-w-[180px] sm:max-w-[250px]">
                             {post.caption || `Post ${index + 1}`}
                           </div>
-                          <div className="text-xs text-gray-400 font-mono">{post.platform_post_id}</div>
+                          <div className="text-xs text-gray-400 font-mono mt-0.5">{post.platform_post_id}</div>
                         </td>
-                        {chartConfig.metrics.map((metric) => (
-                          <td key={metric.key} className="px-4 py-2.5 text-right font-semibold" style={{ color: metric.color }}>
+                        {platformConfig.metrics.map((metric) => (
+                          <td 
+                            key={metric.key} 
+                            className="px-4 py-3 text-right font-bold tabular-nums"
+                            style={{ color: metric.color }}
+                          >
                             {getMetricValue(post, metric.key).toLocaleString()}
                           </td>
                         ))}
                       </tr>
                     ))}
                   </tbody>
-                  <tfoot className="bg-gray-50">
+                  <tfoot className="bg-primary-50/50">
                     <tr>
-                      <td className="px-4 py-2.5 font-bold text-gray-900">Total</td>
-                      {chartConfig.metrics.map((metric) => (
-                        <td key={metric.key} className="px-4 py-2.5 text-right font-bold" style={{ color: metric.color }}>
+                      <td className="px-4 py-3 font-bold text-gray-900">Grand Total</td>
+                      {platformConfig.metrics.map((metric) => (
+                        <td 
+                          key={metric.key} 
+                          className="px-4 py-3 text-right font-bold text-lg tabular-nums"
+                          style={{ color: metric.color }}
+                        >
                           {posts.reduce((sum, p) => sum + getMetricValue(p, metric.key), 0).toLocaleString()}
                         </td>
                       ))}
