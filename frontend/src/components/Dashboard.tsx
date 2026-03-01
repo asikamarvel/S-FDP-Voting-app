@@ -261,12 +261,14 @@ export function Dashboard() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">S</span>
-              </div>
+              <img 
+                src="/SFDP_logo.png" 
+                alt="SFDP Logo" 
+                className="h-10 w-auto object-contain"
+              />
               <div>
-                <h1 className="text-lg font-bold text-gray-900">SocialVote</h1>
-                <p className="text-xs text-gray-500">by SFDP</p>
+                <h1 className="text-lg font-bold text-gray-900">Health Innovation Challenge</h1>
+                <p className="text-xs text-primary-600 font-medium">Stage 2</p>
               </div>
             </div>
             

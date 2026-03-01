@@ -19,7 +19,7 @@ function PublicDashboardContent() {
 export default function PublicDashboardPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-green-50/30">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-teal-50/30">
         <div className="flex flex-col items-center">
           <Loader2 className="w-10 h-10 animate-spin text-primary-500 mb-3" />
           <p className="text-sm text-gray-500">Loading dashboard...</p>

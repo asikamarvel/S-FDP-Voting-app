@@ -13,38 +13,38 @@ import {
 import { campaignApi, postApi, Post } from '@/lib/api';
 import { SFDPFooter } from './Footer';
 
-// SFDP Brand Colors (Blue from logo)
-const SFDP_BLUE = '#2563eb';
-const SFDP_BLUE_LIGHT = '#3b82f6';
-const SFDP_BLUE_DARK = '#1d4ed8';
+// SFDP Brand Colors (Teal from s-fdp.org)
+const SFDP_TEAL = '#0d9488';
+const SFDP_TEAL_LIGHT = '#14b8a6';
+const SFDP_TEAL_DARK = '#0f766e';
 
 // Platform-specific chart configurations with SFDP brand colors
 const platformCharts = {
   twitter: {
     metrics: [
-      { key: 'likes', label: 'Likes', color: '#2563eb' },
-      { key: 'replies', label: 'Replies', color: '#3b82f6' },
-      { key: 'valid', label: 'Valid Followers', color: '#1d4ed8' },
+      { key: 'retweets', label: 'Retweets', color: '#0d9488' },
+      { key: 'likes', label: 'Likes', color: '#14b8a6' },
+      { key: 'valid', label: 'Valid Followers', color: '#0f766e' },
     ],
   },
   youtube: {
     metrics: [
-      { key: 'views', label: 'Views', color: '#2563eb' },
-      { key: 'likes', label: 'Likes', color: '#3b82f6' },
-      { key: 'uniqueCommenters', label: 'Unique Commenters', color: '#1d4ed8' },
+      { key: 'views', label: 'Views', color: '#0d9488' },
+      { key: 'likes', label: 'Likes', color: '#14b8a6' },
+      { key: 'uniqueCommenters', label: 'Unique Commenters', color: '#0f766e' },
     ],
   },
   instagram: {
     metrics: [
-      { key: 'likes', label: 'Likes', color: '#2563eb' },
-      { key: 'comments', label: 'Comments', color: '#3b82f6' },
+      { key: 'likes', label: 'Likes', color: '#0d9488' },
+      { key: 'comments', label: 'Comments', color: '#14b8a6' },
     ],
   },
   facebook: {
     metrics: [
-      { key: 'reactions', label: 'Reactions', color: '#2563eb' },
-      { key: 'comments', label: 'Comments', color: '#3b82f6' },
-      { key: 'shares', label: 'Shares', color: '#1d4ed8' },
+      { key: 'reactions', label: 'Reactions', color: '#0d9488' },
+      { key: 'comments', label: 'Comments', color: '#14b8a6' },
+      { key: 'shares', label: 'Shares', color: '#0f766e' },
     ],
   },
 };
@@ -81,6 +81,7 @@ export function PublicDashboard({ campaignId }: PublicDashboardProps) {
       case 'likes': return post.likes_count || 0;
       case 'comments': return post.comments_count || 0;
       case 'replies': return post.comments_count || 0;
+      case 'retweets': return post.engagement_count || 0;
       case 'valid': return post.valid_vote_count || 0;
       case 'views': return post.views_count || 0;
       case 'reactions': return post.likes_count || 0;
@@ -113,35 +114,47 @@ export function PublicDashboard({ campaignId }: PublicDashboardProps) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
-      {/* Beautiful Header with SFDP Branding */}
-      <header className="bg-white border-b border-gray-100 shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 py-4 sm:py-6">
-          {/* Logo and Org Name */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-4">
-            <img 
-              src="/SFDP_logo.png" 
-              alt="SFDP Logo" 
-              className="h-14 sm:h-16 w-auto object-contain"
-            />
-            <div className="text-center sm:text-left">
-              <h1 className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">
-                Society for Disease Prevention
-              </h1>
-              <h2 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-primary-700 via-primary-600 to-primary-500 bg-clip-text text-transparent">
-                S-FDP Health Innovation Challenge 2026
-              </h2>
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-white to-teal-50/30">
+      {/* Premium Header - Inspired by s-fdp.org */}
+      <header className="relative overflow-hidden">
+        {/* Background gradient */}
+        <div className="absolute inset-0 bg-gradient-to-r from-primary-700 via-primary-600 to-primary-700"></div>
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAzMHYySDI0di0yaDEyek0zNiAyNnYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-30"></div>
+        
+        <div className="relative max-w-5xl mx-auto px-4 py-6 sm:py-8">
+          {/* Top bar with logo and org name */}
+          <div className="flex flex-col items-center text-center mb-6">
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 mb-4">
+              <img 
+                src="/SFDP_logo.png" 
+                alt="SFDP Logo" 
+                className="h-16 sm:h-20 w-auto object-contain"
+              />
+            </div>
+            <p className="text-teal-100 text-xs sm:text-sm font-medium uppercase tracking-widest mb-2">
+              Society for Disease Prevention
+            </p>
+            <h1 className="text-2xl sm:text-4xl font-bold text-white mb-2">
+              Health Innovation Challenge
+            </h1>
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-semibold">
+                Stage 2
+              </span>
+              <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm">
+                2026
+              </span>
             </div>
           </div>
           
           {/* Live Badge */}
           <div className="flex justify-center">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary-50 border border-primary-200 rounded-full">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full">
               <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-400"></span>
               </span>
-              <span className="text-xs font-semibold text-primary-700">Live Dashboard</span>
+              <span className="text-xs font-semibold text-white">Live Results</span>
             </div>
           </div>
         </div>
@@ -227,7 +240,7 @@ export function PublicDashboard({ campaignId }: PublicDashboardProps) {
                               tickLine={false}
                             />
                             <YAxis hide />
-                            <Tooltip content={<SimpleTooltip />} cursor={{ fill: 'rgba(37, 99, 235, 0.08)' }} />
+                            <Tooltip content={<SimpleTooltip />} cursor={{ fill: 'rgba(13, 148, 136, 0.08)' }} />
                             <Bar 
                               dataKey="value" 
                               fill={metric.color}
