@@ -254,45 +254,62 @@ export function Dashboard() {
   const isValidating = validatingPosts.size > 0 || validatingAll;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <div className="flex items-center gap-3">
-              <img 
-                src="/SFDP_logo.png" 
-                alt="SFDP Logo" 
-                className="h-10 w-auto object-contain"
-              />
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+      {/* Premium Header */}
+      <header className="relative overflow-hidden">
+        {/* Background gradient */}
+        <div className="absolute inset-0 bg-gradient-to-r from-primary-800 via-primary-700 to-primary-800"></div>
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAzMHYySDI0di0yaDEyek0zNiAyNnYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-30"></div>
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+          {/* Top row - Logo, Title, Actions */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            {/* Logo and Title */}
+            <div className="flex items-center gap-4">
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-2">
+                <img 
+                  src="/SFDP PNG 3.png" 
+                  alt="SFDP Logo" 
+                  className="h-10 sm:h-12 w-auto object-contain"
+                />
+              </div>
               <div>
-                <h1 className="text-lg font-bold text-gray-900">Health Innovation Challenge</h1>
-                <p className="text-xs text-primary-600 font-medium">Stage 2</p>
+                <p className="text-primary-200 text-xs font-medium uppercase tracking-wider">
+                  Society for Disease Prevention
+                </p>
+                <h1 className="text-xl sm:text-2xl font-bold text-white">
+                  Health Innovation Challenge
+                </h1>
+                <span className="inline-block mt-1 px-2 py-0.5 bg-accent-500/80 rounded text-white text-xs font-semibold">
+                  Stage 2 • Admin
+                </span>
               </div>
             </div>
             
-            {/* Status Message */}
-            {statusMessage && (
-              <div className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                statusMessage.type === 'success' 
-                  ? 'bg-primary-50 text-primary-700 border border-primary-200' 
-                  : 'bg-red-50 text-red-700 border border-red-200'
-              }`}>
-                {statusMessage.text}
-              </div>
-            )}
-
-            {/* Quick Actions */}
+            {/* Status Message & Actions */}
             <div className="flex items-center gap-3">
-              {activeCampaign && (
-                <span className="text-sm text-gray-500">
-                  {activeCampaign.follower_count.toLocaleString()} followers
-                </span>
+              {statusMessage && (
+                <div className={`px-4 py-2 rounded-lg text-sm font-medium backdrop-blur-sm ${
+                  statusMessage.type === 'success' 
+                    ? 'bg-green-500/20 text-green-100 border border-green-400/30' 
+                    : 'bg-red-500/20 text-red-100 border border-red-400/30'
+                }`}>
+                  {statusMessage.text}
+                </div>
               )}
+              
+              {activeCampaign && (
+                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+                  <Users className="w-4 h-4 text-primary-200" />
+                  <span className="text-sm text-white font-medium">
+                    {activeCampaign.follower_count.toLocaleString()}
+                  </span>
+                </div>
+              )}
+              
               <button
                 onClick={logout}
-                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                className="flex items-center gap-2 px-3 py-2 text-sm text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
               >
                 <LogOut className="w-4 h-4" />
                 <span className="hidden sm:inline">Logout</span>
@@ -302,7 +319,7 @@ export function Dashboard() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
         {/* Platform Tabs */}
         <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
           {platforms.map((platform) => {
@@ -314,7 +331,7 @@ export function Dashboard() {
                 className={`flex items-center gap-2 px-5 py-3 rounded-xl font-medium transition-all whitespace-nowrap ${
                   activePlatform === platform.key
                     ? `${platform.bgColor} text-white shadow-lg scale-105`
-                    : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                    : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200 shadow-sm'
                 }`}
               >
                 <span className="text-xl">{platform.icon}</span>
@@ -390,7 +407,7 @@ export function Dashboard() {
                   <button
                     onClick={syncAllPosts}
                     disabled={isSyncing}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 disabled:opacity-50"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 disabled:opacity-50"
                   >
                     {syncingAll ? (
                       <Loader2 className="w-4 h-4 animate-spin" />

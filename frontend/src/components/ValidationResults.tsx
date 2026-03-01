@@ -51,9 +51,9 @@ export function ValidationResults({ campaign, posts }: ValidationResultsProps) {
               {summaryData.total_invalid_votes}
             </p>
           </div>
-          <div className="bg-blue-50 rounded-lg p-4">
-            <p className="text-sm text-blue-600">Validation Rate</p>
-            <p className="text-2xl font-bold text-blue-700">
+          <div className="bg-primary-50 rounded-lg p-4">
+            <p className="text-sm text-primary-600">Validation Rate</p>
+            <p className="text-2xl font-bold text-primary-700">
               {summaryData.overall_validation_rate.toFixed(1)}%
             </p>
           </div>
@@ -131,7 +131,7 @@ function PostValidationCard({ post }: { post: Post }) {
                     {vote.engagement_type === 'like' ? (
                       <Heart className="w-4 h-4 text-red-500" />
                     ) : (
-                      <MessageCircle className="w-4 h-4 text-blue-500" />
+                      <MessageCircle className="w-4 h-4 text-primary-500" />
                     )}
                   </td>
                   <td className="px-2 py-1">

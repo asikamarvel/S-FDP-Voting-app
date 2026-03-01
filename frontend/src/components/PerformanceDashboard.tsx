@@ -165,32 +165,51 @@ export function PerformanceDashboard({ isPublic = false, publicCampaignId }: Per
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-between h-14">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+      {/* Premium Header */}
+      <header className="relative overflow-hidden">
+        {/* Background gradient */}
+        <div className="absolute inset-0 bg-gradient-to-r from-primary-800 via-primary-700 to-primary-800"></div>
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAzMHYySDI0di0yaDEyek0zNiAyNnYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-30"></div>
+        
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-4">
+          <div className="flex items-center justify-between">
+            {/* Left - Back/Logo */}
             {!isPublic ? (
               <button
                 onClick={() => router.push('/')}
-                className="flex items-center gap-2 text-gray-500 hover:text-gray-900 text-sm"
+                className="flex items-center gap-2 text-white/80 hover:text-white text-sm transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
-                <span>Back</span>
+                <span>Back to Dashboard</span>
               </button>
             ) : (
-              <div className="flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-primary-600" />
-                <span className="font-semibold text-gray-900">SocialVote</span>
+              <div className="flex items-center gap-3">
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-1.5">
+                  <img 
+                    src="/SFDP PNG 3.png" 
+                    alt="SFDP Logo" 
+                    className="h-8 w-auto object-contain"
+                  />
+                </div>
+                <div>
+                  <p className="text-primary-200 text-xs font-medium uppercase tracking-wider">SFDP</p>
+                  <h1 className="text-lg font-bold text-white">Performance Analytics</h1>
+                </div>
               </div>
             )}
             
-            <h1 className="text-sm font-semibold text-gray-700">
-              {selectedCampaign?.name || 'Performance'}
-            </h1>
+            {/* Center - Title */}
+            <div className="hidden sm:block text-center">
+              <h1 className="text-lg font-semibold text-white">
+                {selectedCampaign?.name || 'Performance Dashboard'}
+              </h1>
+              <p className="text-xs text-primary-200">Analytics & Insights</p>
+            </div>
 
+            {/* Right - Actions */}
             <div className="flex items-center gap-2">
-              {/* Campaign Selector - only for authenticated users */}
+              {/* Campaign Selector */}
               {!isPublic && campaignsData?.campaigns && campaignsData.campaigns.length > 1 && (
                 <select
                   value={selectedCampaign?.id || ''}
@@ -198,21 +217,21 @@ export function PerformanceDashboard({ isPublic = false, publicCampaignId }: Per
                     const id = e.target.value;
                     router.push(`/performance${id ? `?campaign=${id}` : ''}`);
                   }}
-                  className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700"
+                  className="px-3 py-1.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-sm text-white"
                 >
                   {campaignsData.campaigns.map((campaign) => (
-                    <option key={campaign.id} value={campaign.id}>
+                    <option key={campaign.id} value={campaign.id} className="text-gray-900">
                       {campaign.name}
                     </option>
                   ))}
                 </select>
               )}
 
-              {/* Share Button - only for authenticated users */}
+              {/* Share Button */}
               {!isPublic && selectedCampaign && (
                 <button
                   onClick={() => setShowShareModal(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-accent-500 text-white rounded-lg text-sm font-medium hover:bg-accent-600 transition-colors"
                 >
                   <Share2 className="w-4 h-4" />
                   <span>Share</span>
@@ -223,20 +242,20 @@ export function PerformanceDashboard({ isPublic = false, publicCampaignId }: Per
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+      <div className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 py-6">
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+            <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
           </div>
         ) : posts.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
+          <div className="text-center py-16 bg-white rounded-2xl border border-gray-200 shadow-sm">
             <BarChart3 className="w-12 h-12 mx-auto text-gray-300 mb-3" />
             <p className="text-lg font-medium text-gray-600">No tracked posts yet</p>
             <p className="text-gray-400 text-sm mt-1">Add posts to see performance metrics</p>
             {!isPublic && (
               <button
                 onClick={() => router.push('/')}
-                className="mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700"
+                className="mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
               >
                 Go to Dashboard
               </button>
@@ -246,14 +265,20 @@ export function PerformanceDashboard({ isPublic = false, publicCampaignId }: Per
           <div className="space-y-4">
             {/* Campaign Header Card */}
             {selectedCampaign && (
-              <div className="bg-white rounded-xl border border-gray-200 p-4">
+              <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-lg font-bold text-gray-900">{selectedCampaign.name}</h2>
-                    <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
-                      <span className="capitalize px-2 py-0.5 bg-gray-100 rounded-full">{platform}</span>
-                      <span>@{selectedCampaign.official_account_username || selectedCampaign.official_account_id}</span>
-                      <span>{posts.length} posts</span>
+                    <h2 className="text-xl font-bold text-gray-900">{selectedCampaign.name}</h2>
+                    <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
+                      <span className="capitalize px-2.5 py-1 bg-primary-50 text-primary-700 rounded-full font-medium">{platform}</span>
+                      <span className="flex items-center gap-1">
+                        <span className="text-gray-400">@</span>
+                        {selectedCampaign.official_account_username || selectedCampaign.official_account_id}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <BarChart3 className="w-3.5 h-3.5" />
+                        {posts.length} posts
+                      </span>
                       {platform === 'twitter' && (
                         <span>{selectedCampaign.follower_count.toLocaleString()} followers</span>
                       )}
@@ -435,9 +460,9 @@ export function PerformanceDashboard({ isPublic = false, publicCampaignId }: Per
               </button>
             </div>
 
-            <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg mb-4">
-              <ExternalLink className="w-4 h-4 text-blue-600" />
-              <p className="text-sm text-blue-700">
+            <div className="flex items-center gap-2 p-3 bg-primary-50 rounded-lg mb-4">
+              <ExternalLink className="w-4 h-4 text-primary-600" />
+              <p className="text-sm text-primary-700">
                 This link is view-only. Viewers cannot make changes.
               </p>
             </div>

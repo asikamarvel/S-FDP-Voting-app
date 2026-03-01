@@ -13,38 +13,39 @@ import {
 import { campaignApi, postApi, Post } from '@/lib/api';
 import { SFDPFooter } from './Footer';
 
-// SFDP Brand Colors (Teal from s-fdp.org)
-const SFDP_TEAL = '#0d9488';
-const SFDP_TEAL_LIGHT = '#14b8a6';
-const SFDP_TEAL_DARK = '#0f766e';
+// SFDP Brand Colors (Dark Navy with metallic orange accent)
+const SFDP_BLUE = '#171c2e';
+const SFDP_BLUE_LIGHT = '#252e54';
+const SFDP_BLUE_DARK = '#0f1219';
+const SFDP_ORANGE = '#d97706';
 
 // Platform-specific chart configurations with SFDP brand colors
 const platformCharts = {
   twitter: {
     metrics: [
-      { key: 'retweets', label: 'Retweets', color: '#0d9488' },
-      { key: 'likes', label: 'Likes', color: '#14b8a6' },
-      { key: 'valid', label: 'Valid Followers', color: '#0f766e' },
+      { key: 'retweets', label: 'Retweets', color: '#171c2e' },
+      { key: 'likes', label: 'Likes', color: '#3d4a7a' },
+      { key: 'valid', label: 'Valid Followers', color: '#d97706' },
     ],
   },
   youtube: {
     metrics: [
-      { key: 'views', label: 'Views', color: '#0d9488' },
-      { key: 'likes', label: 'Likes', color: '#14b8a6' },
-      { key: 'uniqueCommenters', label: 'Unique Commenters', color: '#0f766e' },
+      { key: 'views', label: 'Views', color: '#171c2e' },
+      { key: 'likes', label: 'Likes', color: '#3d4a7a' },
+      { key: 'uniqueCommenters', label: 'Unique Commenters', color: '#d97706' },
     ],
   },
   instagram: {
     metrics: [
-      { key: 'likes', label: 'Likes', color: '#0d9488' },
-      { key: 'comments', label: 'Comments', color: '#14b8a6' },
+      { key: 'likes', label: 'Likes', color: '#171c2e' },
+      { key: 'comments', label: 'Comments', color: '#3d4a7a' },
     ],
   },
   facebook: {
     metrics: [
-      { key: 'reactions', label: 'Reactions', color: '#0d9488' },
-      { key: 'comments', label: 'Comments', color: '#14b8a6' },
-      { key: 'shares', label: 'Shares', color: '#0f766e' },
+      { key: 'reactions', label: 'Reactions', color: '#171c2e' },
+      { key: 'comments', label: 'Comments', color: '#3d4a7a' },
+      { key: 'shares', label: 'Shares', color: '#d97706' },
     ],
   },
 };
@@ -114,11 +115,11 @@ export function PublicDashboard({ campaignId }: PublicDashboardProps) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-white to-teal-50/30">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
       {/* Premium Header - Inspired by s-fdp.org */}
       <header className="relative overflow-hidden">
         {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-r from-primary-700 via-primary-600 to-primary-700"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-primary-800 via-primary-700 to-primary-800"></div>
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAzMHYySDI0di0yaDEyek0zNiAyNnYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-30"></div>
         
         <div className="relative max-w-5xl mx-auto px-4 py-6 sm:py-8">
@@ -126,19 +127,19 @@ export function PublicDashboard({ campaignId }: PublicDashboardProps) {
           <div className="flex flex-col items-center text-center mb-6">
             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 mb-4">
               <img 
-                src="/SFDP_logo.png" 
+                src="/SFDP PNG 3.png" 
                 alt="SFDP Logo" 
                 className="h-16 sm:h-20 w-auto object-contain"
               />
             </div>
-            <p className="text-teal-100 text-xs sm:text-sm font-medium uppercase tracking-widest mb-2">
+            <p className="text-primary-200 text-xs sm:text-sm font-medium uppercase tracking-widest mb-2">
               Society for Disease Prevention
             </p>
             <h1 className="text-2xl sm:text-4xl font-bold text-white mb-2">
               Health Innovation Challenge
             </h1>
             <div className="flex items-center gap-2">
-              <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-semibold">
+              <span className="px-3 py-1 bg-accent-500/80 backdrop-blur-sm rounded-full text-white text-sm font-semibold">
                 Stage 2
               </span>
               <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm">
@@ -240,7 +241,7 @@ export function PublicDashboard({ campaignId }: PublicDashboardProps) {
                               tickLine={false}
                             />
                             <YAxis hide />
-                            <Tooltip content={<SimpleTooltip />} cursor={{ fill: 'rgba(13, 148, 136, 0.08)' }} />
+                            <Tooltip content={<SimpleTooltip />} cursor={{ fill: 'rgba(37, 99, 235, 0.08)' }} />
                             <Bar 
                               dataKey="value" 
                               fill={metric.color}

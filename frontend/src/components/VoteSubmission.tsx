@@ -68,13 +68,13 @@ export function VoteSubmission({ campaignId }: { campaignId: number }) {
   const posts = postsData?.posts || [];
 
   return (
-    <div className="max-w-md mx-auto p-6">
-      <div className="bg-white rounded-xl shadow-lg p-6">
+    <div className="max-w-md mx-auto px-4">
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/60 p-6">
         <div className="text-center mb-6">
-          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Twitter className="w-8 h-8 text-blue-500" />
+          <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <Twitter className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Submit Your Vote</h1>
+          <h2 className="text-2xl font-bold text-gray-900">Submit Your Vote</h2>
           <p className="text-gray-500 mt-2">
             Enter your Twitter username to verify your vote
           </p>
@@ -83,7 +83,7 @@ export function VoteSubmission({ campaignId }: { campaignId: number }) {
         <form onSubmit={handleSubmit} className="space-y-4">
           {loadingPosts ? (
             <div className="flex items-center justify-center py-4">
-              <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+              <Loader2 className="w-6 h-6 animate-spin text-primary-500" />
             </div>
           ) : posts.length === 0 ? (
             <p className="text-center text-gray-500">No active posts to vote on</p>
@@ -96,7 +96,7 @@ export function VoteSubmission({ campaignId }: { campaignId: number }) {
                 <select
                   value={selectedPostId || ''}
                   onChange={(e) => setSelectedPostId(Number(e.target.value))}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white/70 backdrop-blur-sm"
                   required
                 >
                   <option value="">Choose a post...</option>
@@ -121,7 +121,7 @@ export function VoteSubmission({ campaignId }: { campaignId: number }) {
                     value={username}
                     onChange={(e) => setUsername(e.target.value.replace('@', ''))}
                     placeholder="username"
-                    className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full pl-8 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white/70 backdrop-blur-sm"
                     required
                   />
                 </div>
@@ -133,7 +133,7 @@ export function VoteSubmission({ campaignId }: { campaignId: number }) {
               <button
                 type="submit"
                 disabled={submitMutation.isPending || !username || !selectedPostId}
-                className="w-full py-3 px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-3 px-4 bg-gradient-to-r from-accent-600 to-accent-500 text-white font-semibold rounded-xl hover:from-accent-700 hover:to-accent-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg transition-all"
               >
                 {submitMutation.isPending ? (
                   <>
@@ -151,10 +151,10 @@ export function VoteSubmission({ campaignId }: { campaignId: number }) {
         {/* Result Display */}
         {result && (
           <div
-            className={`mt-6 p-4 rounded-lg ${
+            className={`mt-6 p-4 rounded-xl ${
               result.vote_counted
-                ? 'bg-green-50 border border-green-200'
-                : 'bg-red-50 border border-red-200'
+                ? 'bg-green-50/80 border border-green-200/60 backdrop-blur-sm'
+                : 'bg-red-50/80 border border-red-200/60 backdrop-blur-sm'
             }`}
           >
             <div className="flex items-start gap-3">
@@ -165,7 +165,7 @@ export function VoteSubmission({ campaignId }: { campaignId: number }) {
               )}
               <div>
                 <p
-                  className={`font-medium ${
+                  className={`font-semibold ${
                     result.vote_counted ? 'text-green-800' : 'text-red-800'
                   }`}
                 >
@@ -184,9 +184,9 @@ export function VoteSubmission({ campaignId }: { campaignId: number }) {
         )}
 
         {/* Instructions */}
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          <h3 className="text-sm font-medium text-gray-700 mb-2">How it works:</h3>
-          <ol className="text-sm text-gray-500 space-y-1 list-decimal list-inside">
+        <div className="mt-6 pt-6 border-t border-gray-100">
+          <h3 className="text-sm font-semibold text-gray-700 mb-3">How it works:</h3>
+          <ol className="text-sm text-gray-500 space-y-2 list-decimal list-inside">
             <li>Follow the official account on Twitter</li>
             <li>Like the competition post</li>
             <li>Enter your Twitter username above</li>

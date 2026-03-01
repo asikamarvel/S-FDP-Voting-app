@@ -6,11 +6,11 @@ interface StatsCardProps {
   title: string;
   value: string | number;
   icon: LucideIcon;
-  color?: 'blue' | 'green' | 'red' | 'yellow' | 'gray';
+  color?: 'navy' | 'green' | 'red' | 'yellow' | 'gray';
 }
 
 const colorClasses = {
-  blue: 'bg-blue-50 text-blue-600',
+  navy: 'bg-primary-50 text-primary-600',
   green: 'bg-green-50 text-green-600',
   red: 'bg-red-50 text-red-600',
   yellow: 'bg-yellow-50 text-yellow-600',
