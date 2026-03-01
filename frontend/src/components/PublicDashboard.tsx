@@ -281,17 +281,12 @@ export function PublicDashboard({ campaignId }: PublicDashboardProps) {
                     >
                       {/* Card Header */}
                       <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div 
-                              className="w-3 h-3 rounded-sm"
-                              style={{ backgroundColor: metric.color }}
-                            ></div>
-                            <h3 className="text-sm font-semibold text-gray-800">{metric.label}</h3>
-                          </div>
-                          <span className="text-lg font-bold" style={{ color: metric.color }}>
-                            {total.toLocaleString()}
-                          </span>
+                        <div className="flex items-center gap-2">
+                          <div 
+                            className="w-3 h-3 rounded-sm"
+                            style={{ backgroundColor: metric.color }}
+                          ></div>
+                          <h3 className="text-sm font-semibold text-gray-800">{metric.label}</h3>
                         </div>
                       </div>
                       
@@ -372,20 +367,6 @@ export function PublicDashboard({ campaignId }: PublicDashboardProps) {
                         </tr>
                       ))}
                     </tbody>
-                    <tfoot className="bg-primary-50/50">
-                      <tr>
-                        <td className="px-4 py-3 font-bold text-gray-900">Grand Total</td>
-                        {platformConfig.metrics.map((metric) => (
-                          <td 
-                            key={metric.key} 
-                            className="px-4 py-3 text-right font-bold text-lg tabular-nums"
-                            style={{ color: metric.color }}
-                          >
-                            {posts.reduce((sum, p) => sum + getMetricValue(p, metric.key), 0).toLocaleString()}
-                          </td>
-                        ))}
-                      </tr>
-                    </tfoot>
                   </table>
                 </div>
               </div>
