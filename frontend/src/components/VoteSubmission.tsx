@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { CheckCircle, XCircle, Loader2, Twitter } from 'lucide-react';
 import { api } from '@/lib/api';
+import { SFDPFooter } from './Footer';
 
 interface Post {
   id: number;
@@ -191,6 +192,11 @@ export function VoteSubmission({ campaignId }: { campaignId: number }) {
             <li>Enter your Twitter username above</li>
             <li>Your vote will be verified automatically</li>
           </ol>
+        </div>
+        
+        {/* Footer */}
+        <div className="mt-6">
+          <SFDPFooter />
         </div>
       </div>
     </div>

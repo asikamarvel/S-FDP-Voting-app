@@ -15,6 +15,7 @@ import {
   Legend,
 } from 'recharts';
 import { campaignApi, postApi, Post } from '@/lib/api';
+import { SFDPFooter } from './Footer';
 
 // Platform-specific chart configurations
 const platformCharts = {
@@ -452,6 +453,9 @@ export function PerformanceDashboard({ isPublic = false, publicCampaignId }: Per
           </div>
         </div>
       )}
+
+      {/* Footer */}
+      {!isPublic && <SFDPFooter />}
     </div>
   );
 }

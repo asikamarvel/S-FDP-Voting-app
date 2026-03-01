@@ -27,6 +27,7 @@ import {
 import { CampaignForm } from './CampaignForm';
 import { PostForm } from './PostForm';
 import { useAuth } from '@/lib/auth';
+import { SFDPFooter } from './Footer';
 
 // Platform configuration
 type PlatformKey = 'twitter' | 'youtube' | 'instagram' | 'facebook';
@@ -541,6 +542,9 @@ export function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* Footer */}
+      <SFDPFooter />
     </div>
   );
 }
