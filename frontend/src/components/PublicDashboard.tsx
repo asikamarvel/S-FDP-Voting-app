@@ -176,14 +176,14 @@ export function PublicDashboard({ campaignId }: PublicDashboardProps) {
             </div>
           </div>
           
-          {/* Live Badge */}
+          {/* Final Results Badge */}
           <div className="flex justify-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full">
               <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-400"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
               </span>
-              <span className="text-xs font-semibold text-white">Live Results</span>
+              <span className="text-xs font-semibold text-white">Final Results</span>
             </div>
           </div>
         </div>
